@@ -9,11 +9,10 @@ app = FastAPI(title="Andrew Cloud Brain")
 
 api_key = os.environ.get("GEMINI_API_KEY")
 
-# Configuramos el cliente con un timeout máximo de 15 segundos (15000 ms) por petición
-# Así NUNCA se quedará colgado esperando infinitamente a Google
+# Timeout de 25 segundos (25000 ms) por intento para dar margen suficiente a la generación
 client = genai.Client(
     api_key=api_key,
-    http_options=types.HttpOptions(timeout=15000)
+    http_options=types.HttpOptions(timeout=25000)
 ) if api_key else None
 
 SYSTEM_PROMPT = """
@@ -43,14 +42,14 @@ def chatear(datos: MensajeUsuario):
         
     prompt_completo = f"{SYSTEM_PROMPT}\n\nPetición de tu creador Albert:\n{datos.mensaje}\n\nRespuesta de Andrew:"
     
-    # Lista de modelos en cascada: si el principal está saturado o lento, salta al siguiente
+    # Modelos vigentes con sus identificadores exactos de API
     modelos_a_probar = [
         "gemini-3.8-flash",
-        "gemini-3.1-flash-lite",
-        "gemini-2.5-pro"
+        "gemini-3.1-pro-preview",
+        "gemini-3.1-flash-lite-preview"
     ]
     
-    ultimo_error = ""
+    errores_registrados = []
     
     for modelo in modelos_a_probar:
         try:
@@ -64,11 +63,11 @@ def chatear(datos: MensajeUsuario):
                     "modelo_usado": modelo
                 }
         except Exception as e:
-            ultimo_error = f"[{modelo}]: {str(e)}"
+            errores_registrados.append(f"[{modelo}]: {str(e)}")
             time.sleep(1)
             continue
                 
     raise HTTPException(
         status_code=500, 
-        detail=f"No se pudo obtener respuesta rápida de Google. Último detalle: {ultimo_error}"
+        detail=" | ".join(errores_registrados)
     )

@@ -1,11 +1,11 @@
 import os
+import time
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from google import genai
 
 app = FastAPI(title="Andrew Cloud Brain")
 
-# Obtenemos la llave de las variables de entorno de Render
 api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key) if api_key else None
 
@@ -28,21 +28,30 @@ def home():
 
 @app.post("/chat")
 def chatear(datos: MensajeUsuario):
-    try:
-        if not api_key or not client:
-            raise HTTPException(
-                status_code=500, 
-                detail="GEMINI_API_KEY no está configurada en las variables de entorno de Render."
-            )
-            
-        prompt_completo = f"{SYSTEM_PROMPT}\n\nPetición de tu creador Albert:\n{datos.mensaje}\n\nRespuesta de Andrew:"
-        
-        response = client.models.generate_content(
-            model="gemini-3.8-flash",
-            contents=prompt_completo
+    if not api_key or not client:
+        raise HTTPException(
+            status_code=500, 
+            detail="GEMINI_API_KEY no está configurada en las variables de entorno de Render."
         )
         
-        return {"respuesta": response.text.strip()}
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error interno en la API de GenAI: {str(e)}")
+    prompt_completo = f"{SYSTEM_PROMPT}\n\nPetición de tu creador Albert:\n{datos.mensaje}\n\nRespuesta de Andrew:"
+    
+    intentos = 3
+    ultimo_error = ""
+    
+    for intento in range(intentos):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.8-flash",
+                contents=prompt_completo
+            )
+            return {"respuesta": response.text.strip()}
+        except Exception as e:
+            ultimo_error = str(e)
+            if "503" in ultimo_error or "UNAVAILABLE" in ultimo_error:
+                time.sleep(1.5)
+                continue
+            else:
+                break
+                
+    raise HTTPException(status_code=500, detail=f"Error interno en la API de GenAI tras reintentos: {ultimo_error}")

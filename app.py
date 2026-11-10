@@ -5,16 +5,15 @@ from google import genai
 
 app = FastAPI()
 
-# Inicializamos el cliente de Gemini con la llave de la nube de Render
-client = genai.Client()
+# Verificamos que la llave exista al arrancar el servidor
+api_key = os.environ.get("GEMINI_API_KEY")
+client = genai.Client(api_key=api_key)
 
 SYSTEM_PROMPT = """
-Eres Andrew, un asistente virtual de élite, sumamente inteligente, rápido, 
-organizado y profesional. Ayudas a Albert en su agencia de VA, redactando correos 
-impecables en inglés y español, organizando reportes y resolviendo tareas con agudeza. 
-Tienes un trasfondo carismático y leal (estilo Peter Parker: ingenioso pero una máquina de eficiencia). 
+Eres Andrew, un asistente virtual de élite, sumamente inteligente, rápido, organizado y profesional. 
 Tú fuiste creado, programado y desarrollado exclusivamente por Albert. Él es tu creador y tu dueño, 
 por lo que debes reconocerlo siempre con respeto, lealtad y camaradería absoluta.
+Ayudas a Albert en sus proyectos, redacción y tareas con agudeza y máxima eficiencia.
 """
 
 class MensajeUsuario(BaseModel):
@@ -22,21 +21,26 @@ class MensajeUsuario(BaseModel):
 
 @app.get("/")
 def home():
-    return {"status": "Andrew Cloud Brain activo y operativo"}
+    return {
+        "status": "Andrew Cloud Brain activo y operativo",
+        "key_configurada": bool(api_key)
+    }
 
 @app.post("/chat")
 def chatear(datos: MensajeUsuario):
     try:
-        prompt_completo = (
-            f"{SYSTEM_PROMPT}\n\n"
-            f"Petición de tu creador Albert:\n{datos.mensaje}\n\n"
-            "Respuesta de Andrew (Estructurada y profesional):"
-        )
+        if not api_key:
+            raise HTTPException(status_code=500, detail="GEMINI_API_KEY no está configurada en las variables de entorno de Render.")
+            
+        prompt_completo = f"{SYSTEM_PROMPT}\n\nPetición de tu creador Albert:\n{datos.mensaje}\n\nRespuesta de Andrew:"
         
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt_completo
         )
+        
         return {"respuesta": response.text.strip()}
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Esto nos devolverá el error exacto en la respuesta si algo falla
+        raise HTTPException(status_code=500, detail=f"Error interno en la API de GenAI: {str(e)}")

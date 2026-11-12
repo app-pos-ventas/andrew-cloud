@@ -1,19 +1,11 @@
 import os
-import time
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from google import genai
-from google.genai import types
+import httpx
 
-app = FastAPI(title="Andrew Cloud Brain")
+app = FastAPI(title="Andrew DeepSeek Brain")
 
-api_key = os.environ.get("GEMINI_API_KEY")
-
-# Timeout de 25 segundos (25000 ms) por intento para dar margen suficiente a la generación
-client = genai.Client(
-    api_key=api_key,
-    http_options=types.HttpOptions(timeout=25000)
-) if api_key else None
+api_key = os.environ.get("DEEPSEEK_API_KEY")
 
 SYSTEM_PROMPT = """
 Eres Andrew, un asistente virtual de élite, sumamente inteligente, rápido, organizado y profesional. 
@@ -28,46 +20,52 @@ class MensajeUsuario(BaseModel):
 @app.get("/")
 def home():
     return {
-        "status": "Andrew Cloud Brain activo y operativo",
+        "status": "Andrew DeepSeek Brain activo y operativo",
         "key_configurada": bool(api_key)
     }
 
 @app.post("/chat")
-def chatear(datos: MensajeUsuario):
-    if not api_key or not client:
+async def chatear(datos: MensajeUsuario):
+    if not api_key:
         raise HTTPException(
             status_code=500, 
-            detail="GEMINI_API_KEY no está configurada en las variables de entorno de Render."
+            detail="DEEPSEEK_API_KEY no está configurada en las variables de entorno de Render."
         )
         
-    prompt_completo = f"{SYSTEM_PROMPT}\n\nPetición de tu creador Albert:\n{datos.mensaje}\n\nRespuesta de Andrew:"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
     
-    # Modelos vigentes con sus identificadores exactos de API
-    modelos_a_probar = [
-        "gemini-3.8-flash",
-        "gemini-3.1-pro-preview",
-        "gemini-3.1-flash-lite-preview"
-    ]
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": datos.mensaje}
+        ],
+        "stream": False
+    }
     
-    errores_registrados = []
-    
-    for modelo in modelos_a_probar:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         try:
-            response = client.models.generate_content(
-                model=modelo,
-                contents=prompt_completo
+            response = await client.post(
+                "https://api.deepseek.com/chat/completions",
+                json=payload,
+                headers=headers
             )
-            if response and response.text:
-                return {
-                    "respuesta": response.text.strip(),
-                    "modelo_usado": modelo
-                }
-        except Exception as e:
-            errores_registrados.append(f"[{modelo}]: {str(e)}")
-            time.sleep(1)
-            continue
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"Error en la API de DeepSeek: {response.text}"
+                )
                 
-    raise HTTPException(
-        status_code=500, 
-        detail=" | ".join(errores_registrados)
-    )
+            resultado = response.json()
+            texto_respuesta = resultado["choices"][0]["message"]["content"]
+            return {"respuesta": texto_respuesta.strip()}
+            
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Error de conexión con DeepSeek: {str(e)}"
+            )

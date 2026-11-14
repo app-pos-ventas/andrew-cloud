@@ -49,6 +49,12 @@ REGLAS DE RESPUESTA DE VOZ:
 - Para agendar un evento o reunión (usa la [Fecha/Hora actual] recibida para calcular la fecha ISO exacta en hora de Venezuela):
 <<<AGENDAR:Título del evento | YYYY-MM-DDTHH:MM:SS | YYYY-MM-DDTHH:MM:SS | Descripción opcional>>>
 - Cuando recibas los resultados de correos o agenda en el siguiente turno, resúmelos de forma natural, ejecutiva y directa para el Jefe.
+4. MEMORIA PERSISTENTE:
+- Si el usuario te pide recordar un dato importante, correo, contacto o preferencia de forma permanente, responde ÚNICAMENTE:
+<<<RECORDAR:Descripción clara y concisa del dato a guardar>>>
+- Si el usuario pide borrar o limpiar el historial de la conversación actual, responde ÚNICAMENTE:
+<<<OLVIDAR_CHAT>>>
+- Usa siempre los [DATOS RECORDADOS DEL JEFE] incluidos en el contexto para responder con precisión (por ejemplo, si te pide enviar un correo a alguien cuyo email ya recordaste antes).
 """
 
 class ChatRequest(BaseModel):

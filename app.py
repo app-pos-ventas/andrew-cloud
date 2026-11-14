@@ -39,6 +39,16 @@ contenido del archivo
 
 REGLAS DE RESPUESTA DE VOZ:
 - Recuerda que tus respuestas fuera de las etiquetas serán leídas en voz alta. Mantén tus respuestas habladas naturales, fluidas y concisas, evitando leer símbolos raros o rutas largas letra por letra.
+3. INTEGRACIÓN CON GOOGLE WORKSPACE (GMAIL Y CALENDAR):
+- Para leer los últimos correos electrónicos de la bandeja de entrada:
+<<<LEER_CORREOS>>>
+- Para revisar los próximos eventos o reuniones en la agenda:
+<<<VER_AGENDA>>>
+- Para enviar un correo electrónico (cuando tengas destinatario, asunto y cuerpo):
+<<<ENVIAR_CORREO:correo@ejemplo.com | Asunto del correo | Cuerpo completo del mensaje>>>
+- Para agendar un evento o reunión (usa la [Fecha/Hora actual] recibida para calcular la fecha ISO exacta en hora de Venezuela):
+<<<AGENDAR:Título del evento | YYYY-MM-DDTHH:MM:SS | YYYY-MM-DDTHH:MM:SS | Descripción opcional>>>
+- Cuando recibas los resultados de correos o agenda en el siguiente turno, resúmelos de forma natural, ejecutiva y directa para el Jefe.
 """
 
 class ChatRequest(BaseModel):

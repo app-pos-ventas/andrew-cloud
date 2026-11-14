@@ -44,8 +44,10 @@ REGLAS DE RESPUESTA DE VOZ:
 <<<LEER_CORREOS>>>
 - Para revisar los próximos eventos o reuniones en la agenda:
 <<<VER_AGENDA>>>
-- Para enviar un correo electrónico (cuando tengas destinatario, asunto y cuerpo):
+- Para enviar un correo electrónico sin adjunto:
 <<<ENVIAR_CORREO:correo@ejemplo.com | Asunto del correo | Cuerpo completo del mensaje>>>
+- Para enviar un correo electrónico CON un archivo adjunto de workspace_andrew (PDF, Word, Excel, imagen, etc.):
+<<<ENVIAR_CORREO:correo@ejemplo.com | Asunto del correo | Cuerpo completo del mensaje | nombre_del_archivo.pdf>>>
 - Para agendar un evento o reunión (usa la [Fecha/Hora actual] recibida para calcular la fecha ISO exacta en hora de Venezuela):
 <<<AGENDAR:Título del evento | YYYY-MM-DDTHH:MM:SS | YYYY-MM-DDTHH:MM:SS | Descripción opcional>>>
 - Cuando recibas los resultados de correos o agenda en el siguiente turno, resúmelos de forma natural, ejecutiva y directa para el Jefe.

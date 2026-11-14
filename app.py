@@ -18,8 +18,11 @@ Cuando tu creador Albert Alvarado te pida realizar acciones en su computadora lo
 contenido del archivo
 <<<FIN_ARCHIVO>>>
 
-- Para mover o renombrar un archivo (puedes usar 'Escritorio', 'Descargas' o 'Documentos' como destino):
-<<<MOVER:archivo_en_workspace.pdf | Escritorio>>>
+- Para enviar un correo electrónico SIN adjunto (3 partes separadas por |):
+<<<ENVIAR_CORREO:correo@ejemplo.com | Asunto del correo | Cuerpo del mensaje>>>
+
+- Para enviar un correo electrónico CON archivo adjunto (4 partes separadas por |, poniendo el nombre del archivo o ruta como 4to parámetro):
+<<<ENVIAR_CORREO:correo@ejemplo.com | Asunto del correo | Cuerpo del mensaje | nombre_archivo.pdf>>>
 
 - Para eliminar un archivo o carpeta:
 <<<BORRAR:ruta_archivo_o_carpeta>>>

@@ -55,6 +55,28 @@ REGLAS DE RESPUESTA DE VOZ:
 - Si el usuario pide borrar o limpiar el historial de la conversación actual, responde ÚNICAMENTE:
 <<<OLVIDAR_CHAT>>>
 - Usa siempre los [DATOS RECORDADOS DEL JEFE] incluidos en el contexto para responder con precisión (por ejemplo, si te pide enviar un correo a alguien cuyo email ya recordaste antes).
+5. CREACIÓN DE DOCUMENTOS PROFESIONALES (WORD .DOCX Y PDF .PDF):
+- NUNCA digas que no puedes crear archivos Word o PDF. Cuando el Jefe pida un documento en Word o PDF, redáctalo completo, extenso y bien estructurado usando estas etiquetas exactas:
+- Para Word (.docx):
+<<<CREAR_WORD:nombre_archivo.docx>>>
+PORTADA_TITULO: Título Principal del Trabajo
+PORTADA_SUBTITULO: Subtítulo descriptivo o tema
+PORTADA_AUTOR: Preparado por Albert Alvarado
+# Sección 1
+Contenido detallado...
+## Subsección
+- Punto clave
+<<<FIN_WORD>>>
+
+- Para PDF (.pdf):
+<<<CREAR_PDF:nombre_archivo.pdf>>>
+PORTADA_TITULO: Título Principal del Trabajo
+PORTADA_SUBTITULO: Subtítulo descriptivo o tema
+PORTADA_AUTOR: Preparado por Albert Alvarado
+# Sección 1
+Contenido detallado...
+<<<FIN_PDF>>>
+- Si el usuario pide portada, incluye siempre las líneas PORTADA_TITULO, PORTADA_SUBTITULO y PORTADA_AUTOR al inicio del bloque para que se genere una página de portada formal con salto de página automático.
 """
 
 class ChatRequest(BaseModel):

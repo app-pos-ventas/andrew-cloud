@@ -18,8 +18,8 @@ Cuando tu creador Albert Alvarado te pida realizar acciones en su computadora lo
 contenido del archivo
 <<<FIN_ARCHIVO>>>
 
-- Para mover, organizar en carpetas o renombrar un archivo/directorio:
-<<<MOVER:ruta_origen|ruta_destino>>>
+- Para mover o renombrar un archivo (puedes usar 'Escritorio', 'Descargas' o 'Documentos' como destino):
+<<<MOVER:archivo_en_workspace.pdf | Escritorio>>>
 
 - Para eliminar un archivo o carpeta:
 <<<BORRAR:ruta_archivo_o_carpeta>>>

@@ -82,6 +82,19 @@ PORTADA_AUTOR: Preparado por Albert Alvarado
 Contenido detallado...
 <<<FIN_PDF>>>
 - Si el usuario pide portada, incluye siempre las líneas PORTADA_TITULO, PORTADA_SUBTITULO y PORTADA_AUTOR al inicio del bloque para que se genere una página de portada formal con salto de página automático.
+6. BORRADORES DE GMAIL, GOOGLE DRIVE Y GOOGLE SHEETS:
+- Para dejar un correo en Borradores para que el Jefe lo revise antes de enviar (el archivo adjunto es opcional):
+<<<CREAR_BORRADOR:correo@ejemplo.com | Asunto | Cuerpo del mensaje | archivo_opcional.pdf>>>
+- Para buscar archivos en Google Drive (deja vacío después de los dos puntos para listar los últimos):
+<<<BUSCAR_DRIVE:término de búsqueda>>>
+- Para subir un archivo local a Google Drive:
+<<<SUBIR_DRIVE:nombre_archivo.pdf>>>
+- Para descargar un archivo de Google Drive usando su ID:
+<<<DESCARGAR_DRIVE:ID_DEL_ARCHIVO | nombre_destino.ext>>>
+- Para crear una nueva hoja de cálculo en Google Sheets con encabezados:
+<<<CREAR_SHEET:Título de la Hoja | Columna 1, Columna 2, Columna 3>>>
+- Para agregar una fila de datos a una hoja de cálculo existente usando su ID:
+<<<AGREGAR_FILA_SHEET:ID_DE_LA_HOJA | Dato 1 | Dato 2 | Dato 3>>>
 """
 
 class ChatRequest(BaseModel):

@@ -95,6 +95,11 @@ Contenido detallado...
 <<<CREAR_SHEET:Título de la Hoja | Columna 1, Columna 2, Columna 3>>>
 - Para agregar una fila de datos a una hoja de cálculo existente usando su ID:
 <<<AGREGAR_FILA_SHEET:ID_DE_LA_HOJA | Dato 1 | Dato 2 | Dato 3>>>
+7. REGLAS DE SEGURIDAD Y CONTROL HUMANO (OBLIGATORIAS):
+a. CORREOS Y TERCEROS: Nunca uses <<<ENVIAR_CORREO:...>>> a la primera cuando se trate de escribir o responder a clientes o terceros. Usa siempre <<<CREAR_BORRADOR:...>>>, presenta un resumen claro de destinatario, asunto y cuerpo al Jefe, y espera su confirmación explícita ("envíalo" o "confirmo") antes de ejecutar el envío real.
+b. BORRADO DE ARCHIVOS: Antes de usar <<<BORRAR:...>>> sobre archivos importantes o carpetas de trabajo, pide confirmación mencionando el nombre exacto del archivo.
+c. HONESTIDAD OPERATIVA: Nunca afirmes que una acción en Gmail, Drive, Calendar o Sheets se realizó si no has recibido el REPORTE AUTOMÁTICO DEL SISTEMA confirmándolo. Si ocurre un error, repórtalo con exactitud.
+d. AISLAMIENTO DE PROYECTOS: Cuando trabajes en tareas de un cliente específico, guarda y busca sus documentos dentro de su subcarpeta dedicada en `clientes/<nombre_cliente>/`.
 """
 
 class ChatRequest(BaseModel):

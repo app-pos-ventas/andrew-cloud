@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import httpx
+from openai import OpenAI
 
 app = FastAPI(title="Andrew Core Brain - Vision")
 api_key = os.environ.get("DEEPSEEK_API_KEY")
@@ -104,28 +105,72 @@ d. AISLAMIENTO DE PROYECTOS: Cuando trabajes en tareas de un cliente específico
 
 class ChatRequest(BaseModel):
     historial: List[Dict[str, Any]]
+    imagen_pantalla_b64: str | None = None  # Recibe la foto si se la pides
 
 @app.get("/")
 def home():
-    return {"status": "Andrew Core Brain v5 (Vision) activo", "key_configurada": bool(api_key)}
+    api_key_check = os.environ.get("DASHSCOPE_API_KEY") or os.environ.get("DEEPSEEK_API_KEY")
+    return {"status": "Andrew Core Brain v5 (Vision) activo", "key_configurada": bool(api_key_check)}
 
 @app.post("/chat")
 async def chatear(datos: ChatRequest):
-    if not api_key:
-        raise HTTPException(status_code=500, detail="DEEPSEEK_API_KEY no configurada.")
+    api_key_dashscope = os.environ.get("DASHSCOPE_API_KEY")
+    api_key_deepseek = os.environ.get("DEEPSEEK_API_KEY")
+    
+    try:
+        mensajes_completos = [{"role": "system", "content": SYSTEM_PROMPT}] + list(datos.historial)
         
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    
-    mensajes_completos = [{"role": "system", "content": SYSTEM_PROMPT}] + datos.historial
-    
-    payload = {
-        "model": "deepseek-chat",
-        "messages": mensajes_completos,
-        "stream": False
-    }
+        # SI LE PIDISTE VER LA PANTALLA, USA ALIBABA CLOUD (QWEN-VL-MAX)
+        if datos.imagen_pantalla_b64:
+            if not api_key_dashscope:
+                raise HTTPException(status_code=500, detail="DASHSCOPE_API_KEY no configurada para visión.")
+                
+            client_vision = OpenAI(
+                api_key=api_key_dashscope,
+                base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+            )
+            
+            mensajes_completos.append({
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Analiza detalladamente la siguiente captura de pantalla del sistema:"},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{datos.imagen_pantalla_b64}"
+                        },
+                    },
+                ],
+            })
+            
+            completion = client_vision.chat.completions.create(
+                model="qwen-vl-max",
+                messages=mensajes_completos,
+                max_tokens=2048
+            )
+            return {"respuesta": completion.choices[0].message.content}
+            
+        # SI ES TEXTO NORMAL, MANTIENE SU FUNCIONAMIENTO CON DEEPSEEK
+        else:
+            if not api_key_deepseek and not api_key_dashscope:
+                raise HTTPException(status_code=500, detail="No hay API keys configuradas.")
+                
+            client_text = OpenAI(
+                api_key=api_key_deepseek or api_key_dashscope,
+                base_url="https://api.deepseek.com" if api_key_deepseek else "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+            )
+            
+            payload_model = "deepseek-chat" if api_key_deepseek else "qwen-max"
+            
+            completion = client_text.chat.completions.create(
+                model=payload_model,
+                messages=mensajes_completos,
+                stream=False
+            )
+            return {"respuesta": completion.choices[0].message.content}
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:

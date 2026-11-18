@@ -132,7 +132,7 @@ async def chatear(datos: ChatRequest):
     mensajes = [{"role": "system", "content": SYSTEM_PROMPT}] + list(datos.historial)
 
     # MODO VISIÓN: Solo se activa si llega una captura de pantalla desde cliente.pyw
-    if datos.imagen_pantalla_b64:
+   if datos.imagen_pantalla_b64:
         if not api_key_dashscope:
             raise HTTPException(status_code=500, detail="DASHSCOPE_API_KEY no configurada en Render.")
 
@@ -156,32 +156,44 @@ async def chatear(datos: ChatRequest):
             "Authorization": f"Bearer {api_key_dashscope}",
             "Content-Type": "application/json"
         }
-
-        # Prueba automáticamente la región y el nombre de modelo activo en tu cuenta de Alibaba
-        endpoints = [
-            "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-            "https://dashscope-us.aliyuncs.com/compatible-mode/v1/chat/completions"
+        base_intl = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+        modelos_candidatos = [
+            "qwen3-vl-plus",
+            "qwen3-vl-flash",
+            "qwen2.5-vl-72b-instruct",
+            "qwen2.5-vl-32b-instruct",
+            "qwen2.5-vl-7b-instruct",
+            "qwen-vl-max",
+            "qwen-vl-plus"
         ]
-        modelos_vision = ["qwen-vl-max-latest", "qwen2.5-vl-72b-instruct", "qwen-vl-plus-latest"]
 
-        ultimo_error = ""
         async with httpx.AsyncClient(timeout=60.0) as client:
-            for url_api in endpoints:
-                for modelo in modelos_vision:
-                    payload = {
-                        "model": modelo,
-                        "messages": mensajes,
-                        "max_tokens": 2048
-                    }
-                    try:
-                        response = await client.post(url_api, json=payload, headers=headers)
-                        if response.status_code == 200:
-                            resultado = response.json()
-                            texto_respuesta = resultado["choices"][0]["message"]["content"]
-                            return {"respuesta": texto_respuesta.strip()}
-                        ultimo_error = f"[{url_api} | {modelo}]: {response.text}"
-                    except Exception as e:
-                        ultimo_error = str(e)
+            # 1. Intentamos primero consultar los modelos exactos habilitados en tu cuenta
+            try:
+                res_modelos = await client.get(f"{base_intl}/models", headers=headers)
+                if res_modelos.status_code == 200:
+                    lista_api = [m["id"] for m in res_modelos.json().get("data", []) if "vl" in m["id"].lower()]
+                    if lista_api:
+                        modelos_candidatos = lista_api + [m for m in modelos_candidatos if m not in lista_api]
+            except Exception:
+                pass
+
+            ultimo_error = ""
+            for modelo in modelos_candidatos:
+                payload = {
+                    "model": modelo,
+                    "messages": mensajes,
+                    "max_tokens": 2048
+                }
+                try:
+                    response = await client.post(f"{base_intl}/chat/completions", json=payload, headers=headers)
+                    if response.status_code == 200:
+                        resultado = response.json()
+                        texto_respuesta = resultado["choices"][0]["message"]["content"]
+                        return {"respuesta": texto_respuesta.strip()}
+                    ultimo_error = f"[{modelo}]: {response.text}"
+                except Exception as e:
+                    ultimo_error = str(e)
 
         raise HTTPException(status_code=500, detail=f"Error Alibaba Qwen-VL: {ultimo_error}")
 

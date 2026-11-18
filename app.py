@@ -132,7 +132,7 @@ async def chatear(datos: ChatRequest):
     mensajes = [{"role": "system", "content": SYSTEM_PROMPT}] + list(datos.historial)
 
     # MODO VISIÓN: Solo se activa si llega una captura de pantalla desde cliente.pyw
-   if datos.imagen_pantalla_b64:
+    if datos.imagen_pantalla_b64:
         if not api_key_dashscope:
             raise HTTPException(status_code=500, detail="DASHSCOPE_API_KEY no configurada en Render.")
 
@@ -168,7 +168,6 @@ async def chatear(datos: ChatRequest):
         ]
 
         async with httpx.AsyncClient(timeout=60.0) as client:
-            # 1. Intentamos primero consultar los modelos exactos habilitados en tu cuenta
             try:
                 res_modelos = await client.get(f"{base_intl}/models", headers=headers)
                 if res_modelos.status_code == 200:
@@ -224,7 +223,5 @@ async def chatear(datos: ChatRequest):
             resultado = response.json()
             texto_respuesta = resultado["choices"][0]["message"]["content"]
             return {"respuesta": texto_respuesta.strip()}
-        except HTTPException:
-            raise
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error de conexión con DeepSeek: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error de conexión: {str(e)}")

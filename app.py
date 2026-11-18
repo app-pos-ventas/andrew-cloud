@@ -136,7 +136,6 @@ async def chatear(datos: ChatRequest):
         if not api_key_dashscope:
             raise HTTPException(status_code=500, detail="DASHSCOPE_API_KEY no configurada en Render.")
 
-        # Adjuntamos la imagen directamente al último mensaje del usuario para que Qwen-VL la relacione con su pregunta
         ultimo_texto = "Analiza la captura de pantalla del sistema."
         if mensajes[-1]["role"] == "user" and isinstance(mensajes[-1]["content"], str):
             ultimo_texto = mensajes[-1]["content"]
@@ -157,29 +156,34 @@ async def chatear(datos: ChatRequest):
             "Authorization": f"Bearer {api_key_dashscope}",
             "Content-Type": "application/json"
         }
-        payload = {
-            "model": "qwen-vl-max",
-            "messages": mensajes,
-            "max_tokens": 2048
-        }
 
+        # Prueba automáticamente la región y el nombre de modelo activo en tu cuenta de Alibaba
+        endpoints = [
+            "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+            "https://dashscope-us.aliyuncs.com/compatible-mode/v1/chat/completions"
+        ]
+        modelos_vision = ["qwen-vl-max-latest", "qwen2.5-vl-72b-instruct", "qwen-vl-plus-latest"]
+
+        ultimo_error = ""
         async with httpx.AsyncClient(timeout=60.0) as client:
-            try:
-                response = await client.post(
-                    "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
-                    json=payload,
-                    headers=headers
-                )
-                if response.status_code != 200:
-                    raise HTTPException(status_code=500, detail=f"Error Alibaba Qwen-VL: {response.text}")
+            for url_api in endpoints:
+                for modelo in modelos_vision:
+                    payload = {
+                        "model": modelo,
+                        "messages": mensajes,
+                        "max_tokens": 2048
+                    }
+                    try:
+                        response = await client.post(url_api, json=payload, headers=headers)
+                        if response.status_code == 200:
+                            resultado = response.json()
+                            texto_respuesta = resultado["choices"][0]["message"]["content"]
+                            return {"respuesta": texto_respuesta.strip()}
+                        ultimo_error = f"[{url_api} | {modelo}]: {response.text}"
+                    except Exception as e:
+                        ultimo_error = str(e)
 
-                resultado = response.json()
-                texto_respuesta = resultado["choices"][0]["message"]["content"]
-                return {"respuesta": texto_respuesta.strip()}
-            except HTTPException:
-                raise
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Error de conexión con Qwen-VL: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error Alibaba Qwen-VL: {ultimo_error}")
 
     # MODO NORMAL: DeepSeek sigue operando exactamente como siempre
     if not api_key_deepseek:

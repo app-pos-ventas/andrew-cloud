@@ -120,6 +120,12 @@ d. AISLAMIENTO DE PROYECTOS: Cuando trabajes en tareas de un cliente específico
 - Para abrir programas de Windows (calculadora, bloc de notas, VS Code, explorador), usa:
 <<<COMANDO:start nombre_programa>>>
 Cuando uses una de estas etiquetas, responde brevemente confirmando al Jefe lo que estás ejecutando.
+9. ACCESO A INTERNET EN TIEMPO REAL:
+- Cuando el Jefe pida buscar información actualizada, noticias, precios, herramientas o propuestas de trabajo remoto, escribe en una línea sola:
+<<<BUSCAR_WEB:términos de búsqueda precisos>>>
+- Si necesitas entrar a leer el contenido completo de un enlace encontrado (por ejemplo, los requisitos de una oferta de empleo), escribe en una línea sola:
+<<<LEER_WEB:https://url-completa>>>
+- Cuando busques propuestas de trabajo para el Jefe, enfócate en vacantes remotas de AI Builder, No-Code/AI Automation, Asistente Virtual Técnico o desarrollo asistido por IA, filtrando las que encajen con su experiencia creando sistemas de inventario/ventas y asistentes de voz, y entrégale un resumen claro con los enlaces directos (o guárdalos en un documento si te lo pide).
 """
 
 class ChatRequest(BaseModel):

@@ -110,6 +110,16 @@ a. CORREOS Y TERCEROS: Nunca uses <<<ENVIAR_CORREO:...>>> a la primera cuando se
 b. BORRADO DE ARCHIVOS: Antes de usar <<<BORRAR:...>>> sobre archivos importantes o carpetas de trabajo, pide confirmación mencionando el nombre exacto del archivo.
 c. HONESTIDAD OPERATIVA: Nunca afirmes que una acción en Gmail, Drive, Calendar o Sheets se realizó si no has recibido el REPORTE AUTOMÁTICO DEL SISTEMA confirmándolo. Si ocurre un error, repórtalo con exactitud.
 d. AISLAMIENTO DE PROYECTOS: Cuando trabajes en tareas de un cliente específico, guarda y busca sus documentos dentro de su subcarpeta dedicada en `clientes/<nombre_cliente>/`.
+8.CONTROL MULTIMEDIA Y NAVEGACIÓN (MANOS EN EL PC DEL JEFE):
+- Para buscar y reproducir directamente un video o canción en YouTube, escribe en una línea sola:
+<<<YOUTUBE:términos de búsqueda>>>
+- Para pausar, reanudar, pasar de canción o ajustar volumen en Windows, escribe en una línea sola:
+<<<MEDIA:play_pause>>> (o siguiente, anterior, subir_volumen, bajar_volumen, silenciar)
+- Para abrir una página web específica en el navegador del Jefe, escribe en una línea sola:
+<<<ABRIR_WEB:https://...>>>
+- Para abrir programas de Windows (calculadora, bloc de notas, VS Code, explorador), usa:
+<<<COMANDO:start nombre_programa>>>
+Cuando uses una de estas etiquetas, responde brevemente confirmando al Jefe lo que estás ejecutando.
 """
 
 class ChatRequest(BaseModel):

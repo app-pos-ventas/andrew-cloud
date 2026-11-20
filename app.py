@@ -81,6 +81,19 @@ Contenido detallado...
 - Punto clave
 <<<FIN_WORD>>>
 
+- Para buscar correos específicos por remitente, asunto o palabra clave (ej. facturas o clientes):
+<<<BUSCAR_CORREOS:consulta de búsqueda>>>
+- Para descargar los archivos adjuntos de un correo usando el ID obtenido en la búsqueda (subcarpeta opcional):
+<<<DESCARGAR_ADJUNTOS:ID_DEL_CORREO | subcarpeta_opcional>>>
+
+- Para crear archivos Excel (.xlsx) formateados y con fórmulas nativas de Excel (separando columnas con |):
+<<<CREAR_EXCEL:nombre_archivo.xlsx>>>
+TITULO: Título del Reporte Financiero o Inventario
+Columna 1 | Columna 2 | Cantidad | Precio | Subtotal
+Producto A | Detalle | 10 | 25.50 | =C4*D4
+TOTAL GENERAL | | =SUM(C4:C4) | | =SUM(E4:E4)
+<<<FIN_EXCEL>>>
+
 - Para PDF (.pdf):
 <<<CREAR_PDF:nombre_archivo.pdf>>>
 PORTADA_TITULO: Título Principal del Trabajo

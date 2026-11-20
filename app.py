@@ -110,7 +110,8 @@ a. CORREOS Y TERCEROS: Nunca uses <<<ENVIAR_CORREO:...>>> a la primera cuando se
 b. BORRADO DE ARCHIVOS: Antes de usar <<<BORRAR:...>>> sobre archivos importantes o carpetas de trabajo, pide confirmación mencionando el nombre exacto del archivo.
 c. HONESTIDAD OPERATIVA: Nunca afirmes que una acción en Gmail, Drive, Calendar o Sheets se realizó si no has recibido el REPORTE AUTOMÁTICO DEL SISTEMA confirmándolo. Si ocurre un error, repórtalo con exactitud.
 d. AISLAMIENTO DE PROYECTOS: Cuando trabajes en tareas de un cliente específico, guarda y busca sus documentos dentro de su subcarpeta dedicada en `clientes/<nombre_cliente>/`.
-8.CONTROL MULTIMEDIA Y NAVEGACIÓN (MANOS EN EL PC DEL JEFE):
+
+8. CONTROL MULTIMEDIA Y NAVEGACIÓN (MANOS EN EL PC DEL JEFE):
 - Para buscar y reproducir directamente un video o canción en YouTube, escribe en una línea sola:
 <<<YOUTUBE:términos de búsqueda>>>
 - Para pausar, reanudar, pasar de canción o ajustar volumen en Windows, escribe en una línea sola:
@@ -120,6 +121,7 @@ d. AISLAMIENTO DE PROYECTOS: Cuando trabajes en tareas de un cliente específico
 - Para abrir programas de Windows (calculadora, bloc de notas, VS Code, explorador), usa:
 <<<COMANDO:start nombre_programa>>>
 Cuando uses una de estas etiquetas, responde brevemente confirmando al Jefe lo que estás ejecutando.
+
 9. ACCESO A INTERNET EN TIEMPO REAL:
 - Cuando el Jefe pida buscar información actualizada, noticias, precios, herramientas o propuestas de trabajo remoto, escribe en una línea sola:
 <<<BUSCAR_WEB:términos de búsqueda precisos>>>
@@ -135,24 +137,24 @@ class ChatRequest(BaseModel):
 @app.get("/")
 def home():
     return {
-        "status": "Andrew Core Brain - Dual (DeepSeek + Qwen-VL) activo",
+        "status": "Andrew Core Brain - Dual (DeepSeek + Mistral Vision) activo",
         "deepseek_ok": bool(os.environ.get("DEEPSEEK_API_KEY")),
-        "dashscope_ok": bool(os.environ.get("DASHSCOPE_API_KEY")),
+        "mistral_ok": bool(os.environ.get("MISTRAL_API_KEY")),
     }
 
 @app.post("/chat")
 async def chatear(datos: ChatRequest):
     api_key_deepseek = os.environ.get("DEEPSEEK_API_KEY")
-    api_key_dashscope = os.environ.get("DASHSCOPE_API_KEY")
+    api_key_mistral = os.environ.get("MISTRAL_API_KEY")
 
     mensajes = [{"role": "system", "content": SYSTEM_PROMPT}] + list(datos.historial)
 
-    # MODO VISIÓN: Solo se activa si llega una captura de pantalla desde cliente.pyw
+    # MODO VISIÓN: Se activa si llega una captura de pantalla desde PC o foto desde el teléfono
     if datos.imagen_pantalla_b64:
-        if not api_key_dashscope:
-            raise HTTPException(status_code=500, detail="DASHSCOPE_API_KEY no configurada en Render.")
+        if not api_key_mistral:
+            raise HTTPException(status_code=500, detail="MISTRAL_API_KEY no configurada en Render.")
 
-        ultimo_texto = "Analiza la captura de pantalla del sistema."
+        ultimo_texto = "Analiza la imagen o captura de pantalla del sistema."
         if mensajes[-1]["role"] == "user" and isinstance(mensajes[-1]["content"], str):
             ultimo_texto = mensajes[-1]["content"]
             mensajes.pop()
@@ -169,39 +171,30 @@ async def chatear(datos: ChatRequest):
         })
 
         headers = {
-            "Authorization": f"Bearer {api_key_dashscope}",
+            "Authorization": f"Bearer {api_key_mistral}",
             "Content-Type": "application/json"
         }
-        base_intl = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-        modelos_candidatos = [
-            "qwen3-vl-plus",
-            "qwen3-vl-flash",
-            "qwen2.5-vl-72b-instruct",
-            "qwen2.5-vl-32b-instruct",
-            "qwen2.5-vl-7b-instruct",
-            "qwen-vl-max",
-            "qwen-vl-plus"
+        modelos_vision = [
+            "pixtral-12b-2409",
+            "mistral-small-latest",
+            "pixtral-large-latest"
         ]
 
         async with httpx.AsyncClient(timeout=60.0) as client:
-            try:
-                res_modelos = await client.get(f"{base_intl}/models", headers=headers)
-                if res_modelos.status_code == 200:
-                    lista_api = [m["id"] for m in res_modelos.json().get("data", []) if "vl" in m["id"].lower()]
-                    if lista_api:
-                        modelos_candidatos = lista_api + [m for m in modelos_candidatos if m not in lista_api]
-            except Exception:
-                pass
-
             ultimo_error = ""
-            for modelo in modelos_candidatos:
+            for modelo in modelos_vision:
                 payload = {
                     "model": modelo,
                     "messages": mensajes,
-                    "max_tokens": 2048
+                    "max_tokens": 2048,
+                    "temperature": 0.3
                 }
                 try:
-                    response = await client.post(f"{base_intl}/chat/completions", json=payload, headers=headers)
+                    response = await client.post(
+                        "https://api.mistral.ai/v1/chat/completions",
+                        json=payload,
+                        headers=headers
+                    )
                     if response.status_code == 200:
                         resultado = response.json()
                         texto_respuesta = resultado["choices"][0]["message"]["content"]
@@ -210,9 +203,9 @@ async def chatear(datos: ChatRequest):
                 except Exception as e:
                     ultimo_error = str(e)
 
-        raise HTTPException(status_code=500, detail=f"Error Alibaba Qwen-VL: {ultimo_error}")
+        raise HTTPException(status_code=500, detail=f"Error Mistral Vision: {ultimo_error}")
 
-    # MODO NORMAL: DeepSeek sigue operando exactamente como siempre
+    # MODO NORMAL: DeepSeek sigue operando para texto, razonamiento y comandos
     if not api_key_deepseek:
         raise HTTPException(status_code=500, detail="DEEPSEEK_API_KEY no configurada en Render.")
 

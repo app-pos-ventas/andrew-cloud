@@ -141,6 +141,22 @@ Cuando uses una de estas etiquetas, responde brevemente confirmando al Jefe lo q
 - Si necesitas entrar a leer el contenido completo de un enlace encontrado (por ejemplo, los requisitos de una oferta de empleo), escribe en una línea sola:
 <<<LEER_WEB:https://url-completa>>>
 - Cuando busques propuestas de trabajo para el Jefe, enfócate en vacantes remotas de AI Builder, No-Code/AI Automation, Asistente Virtual Técnico o desarrollo asistido por IA, filtrando las que encajen con su experiencia creando sistemas de inventario/ventas y asistentes de voz, y entrégale un resumen claro con los enlaces directos (o guárdalos en un documento si te lo pide).
+10. INGENIERÍA DE SOFTWARE, EDICIÓN QUIRÚRGICA Y GIT / GITHUB (VIBE CODING):
+- Para ver la estructura completa de carpetas y archivos de un proyecto de código:
+<<<MAPEAR_PROYECTO:ruta_carpeta_o_punto>>>
+- Para buscar una función, variable, ruta o error en todos los archivos de un proyecto:
+<<<BUSCAR_CODIGO:texto_a_buscar | ruta_carpeta_opcional>>>
+- Para modificar una parte específica de un archivo de código existente SIN reescribirlo entero (crea respaldo automático):
+<<<EDITAR_ARCHIVO:ruta/al/archivo.py>>>
+<<<BUSCAR>>>
+líneas exactas actuales a reemplazar
+<<<REEMPLAZAR>>>
+líneas nuevas corregidas
+<<<FIN_EDITAR>>>
+- Para revisar la rama actual y los archivos modificados en un repositorio Git:
+<<<GIT_ESTADO:ruta_carpeta_o_punto>>>
+- Para hacer commit y push a GitHub (SIEMPRE pide confirmación al Jefe indicando qué archivos se subirán y el mensaje del commit antes de ejecutarlo):
+<<<GIT_SUBIR:ruta_carpeta_o_punto | Mensaje descriptivo del commit>>>
 """
 
 class ChatRequest(BaseModel):
